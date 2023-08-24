@@ -19,6 +19,11 @@ class Presupuesto {
         this.restante = Number(presupuesto);
         this.gastos = [];
     }
+
+    nuevoGasto(gasto){
+        this.gastos = [...this.gastos, gasto];
+        console.log(this.gastos);
+    }
 }
 class UI{
 
@@ -75,7 +80,7 @@ function preguntarPresupuesto() {
         window.location.reload(); //me refresca la pagina
     }
     presupuesto = new Presupuesto(presupuestoUsuario);
-    // console.log(presupuesto); 
+    console.log(presupuesto); 
 
     ui.insertarPresupuesto(presupuesto);
 
@@ -88,23 +93,26 @@ function agregarGasto(e) {
     const nombre = document.querySelector('#gasto').value;
     
     // input cantidad
-    const cantidad = document.querySelector('#cantidad').value;
+    const cantidad = Number(document.querySelector('#cantidad').value);
 
 
     // validar
     if (nombre === '' || cantidad === '') {
         ui.mostrarAlerta('Ambos campos son obligatorios', 'error');
-        return;
+        
     } else if (cantidad <= 0 || isNaN(cantidad)) {
         ui.mostrarAlerta('Cantidad no valida', 'error');
         return;
     }
 
-
-    ui.mostrarAlerta('Añadido', 'exito');
+    
+    ui.mostrarAlerta('Gasto agregado Correctamente');
     // Generar objeto con el gasto (Object Literal Enhancement), contrario al destructuring este me incrusta variables al objeto.
-    const gasto = {nombre, cantidad};
-    // console.log(gasto);
+    const gasto = {nombre, cantidad, id: uuid.v4(),};
+
+    // llamando a el objeto de la instancia 'presupuesto'
+    presupuesto.nuevoGasto(gasto);
+
     formulario.reset();
 
 }
