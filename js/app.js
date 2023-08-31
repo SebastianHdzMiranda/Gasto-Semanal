@@ -8,6 +8,8 @@ function eventListeners() {
     document.addEventListener('DOMContentLoaded', preguntarPresupuesto);
 
     formulario.addEventListener('submit', agregarGasto);
+
+    gastoListado.addEventListener('click', borrarGasto);
 }
 
 
@@ -89,28 +91,33 @@ class UI{
 
             item.innerHTML= `
                 <span>${nombre}</span>
-                <span class="badge badge-primary badge-pill">${cantidad}</span>
+                <span class="badge badge-primary badge-pill">$${cantidad}</span>
                 <button class="btn btn-danger borrar-gasto">Borrar &times</button>
 
             `;
 
+            
             gastoListado.appendChild(item);
         });
-
-
+        
     }
     actualizarRestante(restante){
         document.querySelector('#restante').textContent = restante;
-
+        
+        const btnAgregar = formulario.querySelector('button');
 
         if (restante <= 0) {
-            const btnAgregar = formulario.querySelector('button');
             btnAgregar.disabled = true;
+        } else{
+            btnAgregar.disabled = false;
         }
     }
     comprobarPresupuesto(presupuestoObj){
         const {presupuesto, restante} = presupuestoObj;
         const restanteDiv = document.querySelector('.restante');
+        restanteDiv.classList.add('alert-sucess');
+        restanteDiv.classList.remove('alert-danger', 'alert-warning');
+
 
         // comprobar 25% 
         if ( (presupuesto / 4 ) >= restante ) {
@@ -160,7 +167,7 @@ function preguntarPresupuesto() {
 
 
     presupuesto = new Presupuesto(presupuestoUsuario);
-    console.log(presupuesto); 
+    // console.log(presupuesto); 
 
     ui.insertarPresupuesto(presupuesto);
 
@@ -179,7 +186,7 @@ function agregarGasto(e) {
     // si un gasto vale mas del restante no podemos agregarlo
     const restante = Number(document.querySelector('#restante').textContent);
 
-    console.log(restante);
+    // console.log(restante);
 
 
     // validar
@@ -187,13 +194,16 @@ function agregarGasto(e) {
         ui.mostrarAlerta('Ambos campos son obligatorios', 'error');
         return;
         
-    } else if (cantidad <= 0 || isNaN(cantidad) || cantidad > restante) {
+    } else if (cantidad <= 0 || isNaN(cantidad)) {
         ui.mostrarAlerta('Cantidad no valida', 'error');
         return;
-    }
+    }  else if (cantidad > restante) {
+        ui.mostrarAlerta('La cantidad supera tu presupuesto', 'error');
+        return;
+    } 
 
     
-    ui.mostrarAlerta('Gasto agregado Correctamente');
+    ui.mostrarAlerta('Agregado Correctamente');
     // Generar objeto con el gasto (Object Literal Enhancement), contrario al destructuring este me incrusta variables al objeto.
     const gasto = {nombre, cantidad, id: Date.now(),};
 
@@ -209,7 +219,30 @@ function agregarGasto(e) {
     // cambiar color de restante
     ui.comprobarPresupuesto(presupuesto);
 
-
     formulario.reset();
+
+}
+
+function borrarGasto(e) {
+    e.preventDefault();
+    if (e.target.classList.contains('borrar-gasto')) {
+        const Id = Number(e.target.parentElement.dataset.id);
+        // console.log(Id);
+        
+        // filtrando el gasto con el mismo id
+        presupuesto.gastos = presupuesto.gastos.filter( gasto => gasto.id !== Id);
+
+        // console.log(presupuesto.gastos);
+        ui.mostrarListado(presupuesto.gastos);
+
+        
+        presupuesto.calcularRestante();
+        ui.actualizarRestante(presupuesto.restante);
+        ui.comprobarPresupuesto(presupuesto);
+
+        
+    }
+
+    
 
 }
