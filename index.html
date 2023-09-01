@@ -11,6 +11,17 @@
 
   </head>
   <body>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+          <h2>Ingresa tu presupuesto</h2>
+          <form id="budgetForm">
+            <input type="number" id="budgetInput" placeholder="Escribe tu presupuesto...">
+            <button type="submit">Enviar</button>
+          </form>
+        </div>
+    </div>
+
     <div class="container">
         <header>
                 <h1 class="text-center">Gasto Semanal</h1>
@@ -27,7 +38,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="cantidad">Cantidad:</label>
-                                    <input type="text" class="form-control" id="cantidad" placeholder="Cantidad en $">
+                                    <input type="number" class="form-control" id="cantidad" placeholder="Cantidad en $">
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">Agregar</button>

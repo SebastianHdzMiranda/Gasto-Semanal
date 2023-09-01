@@ -1,11 +1,14 @@
 // Variables y Selectores
 const formulario = document.querySelector('#agregar-gasto');
 const gastoListado = document.querySelector('#gastos ul');
+const budgetForm = document.querySelector('#budgetForm');
+const modal = document.getElementById("myModal");
+
 
 // Eventos
 eventListeners();
 function eventListeners() {
-    document.addEventListener('DOMContentLoaded', preguntarPresupuesto);
+    budgetForm.addEventListener('submit', preguntarPresupuesto);
 
     formulario.addEventListener('submit', agregarGasto);
 
@@ -48,7 +51,7 @@ class UI{
     }
 
     // imprimir alerta en la interface
-    mostrarAlerta(mensaje, tipo){
+    mostrarAlerta(mensaje, tipo, container){
         // verificar si existe(evitar duplicidad)
         this.verificarExistente('alerta-gastos');
 
@@ -61,8 +64,16 @@ class UI{
         }
         div.innerHTML = mensaje;
 
-        const contenedor = document.querySelector('.primario');
+        let contenedor;
+
+        if (container === 'primario') {
+            contenedor = document.querySelector('.primario');
+        }
+        if (container === 'modal-content') {
+            contenedor = document.querySelector('.modal-content');
+        }
         contenedor.insertBefore(div, contenedor.children[1]);
+
 
         setTimeout(() => {
             div.remove();
@@ -155,14 +166,21 @@ let presupuesto;
 const ui = new UI();
 
 // Funciones
-function preguntarPresupuesto() {
-    const presupuestoUsuario = prompt('¿Cual es tu Presupuesto?');
+function preguntarPresupuesto(e) {
+    e.preventDefault();
+    // const presupuestoUsuario = prompt('¿Cual es tu Presupuesto?');
 
-    // console.log(Number(presupuestoUsuario)); //me tranforma a numero
-    // console.log(isNaN(presupuestoUsuario)); //is not a number, es decir verifica si un valor no es un numero
+    const presupuestoUsuario = Number(document.querySelector('#budgetInput').value);
+
+    console.log(presupuestoUsuario);
+
+    console.log(Number(presupuestoUsuario)); //me tranforma a numero
+    console.log(isNaN(presupuestoUsuario)); //is not a number, es decir verifica si un valor no es un numero
 
     if (presupuestoUsuario === '' || presupuestoUsuario === null || isNaN(presupuestoUsuario) || presupuestoUsuario <= 0) {
-        window.location.reload(); //me refresca la pagina
+        // window.location.reload(); //me refresca la pagina
+        ui.mostrarAlerta('Presupuesto no valido', 'error', 'modal-content');
+        return;
     }
 
 
@@ -170,7 +188,7 @@ function preguntarPresupuesto() {
     // console.log(presupuesto); 
 
     ui.insertarPresupuesto(presupuesto);
-
+    modal.style.display = "none";
 }
 
 function agregarGasto(e) {
@@ -191,19 +209,19 @@ function agregarGasto(e) {
 
     // validar
     if (nombre === '' || cantidad === '') {
-        ui.mostrarAlerta('Ambos campos son obligatorios', 'error');
+        ui.mostrarAlerta('Ambos campos son obligatorios', 'error', 'primario');
         return;
         
     } else if (cantidad <= 0 || isNaN(cantidad)) {
-        ui.mostrarAlerta('Cantidad no valida', 'error');
+        ui.mostrarAlerta('Cantidad no valida', 'error', 'primario');
         return;
     }  else if (cantidad > restante) {
-        ui.mostrarAlerta('La cantidad supera tu presupuesto', 'error');
+        ui.mostrarAlerta('La cantidad supera tu presupuesto', 'error', 'primario');
         return;
     } 
 
     
-    ui.mostrarAlerta('Agregado Correctamente');
+    ui.mostrarAlerta('Agregado Correctamente', 'exito', 'primario');
     // Generar objeto con el gasto (Object Literal Enhancement), contrario al destructuring este me incrusta variables al objeto.
     const gasto = {nombre, cantidad, id: Date.now(),};
 
