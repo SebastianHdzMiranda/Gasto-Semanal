@@ -11,8 +11,6 @@ function eventListeners() {
     budgetForm.addEventListener('submit', preguntarPresupuesto);
 
     formulario.addEventListener('submit', agregarGasto);
-
-    gastoListado.addEventListener('click', borrarGasto);
 }
 
 
@@ -37,6 +35,13 @@ class Presupuesto {
         // console.log(sumaGastos);
 
         this.restante = this.presupuesto - sumaGastos;
+    }
+
+    borrarGasto(id){
+        this.gastos = this.gastos.filter((gasto)=>gasto.id !== id);
+        // console.log(this.gastos);
+
+        this.calcularRestante();
     }
 }
 class UI{
@@ -65,7 +70,6 @@ class UI{
         div.innerHTML = mensaje;
 
         let contenedor;
-
         if (container === 'primario') {
             contenedor = document.querySelector('.primario');
         }
@@ -81,6 +85,7 @@ class UI{
     } 
 
     mostrarListado( listado ){
+        /*LOCALSTORAGE */
         // console.log(listado);
         // limpia el html del contenedor (ul)
         this.limpiarHTML();        
@@ -103,9 +108,12 @@ class UI{
             item.innerHTML= `
                 <span>${nombre}</span>
                 <span class="badge badge-primary badge-pill">$${cantidad}</span>
-                <button class="btn btn-danger borrar-gasto">Borrar &times</button>
+                <button class="btn btn-danger borrar-gasto" data-borrar>Borrar &times</button>
 
             `;
+            const btnBorrar = item.querySelector('button');
+            btnBorrar.onclick = ()=> borrarGasto(id);
+
 
             
             gastoListado.appendChild(item);
@@ -113,6 +121,8 @@ class UI{
         
     }
     actualizarRestante(restante){
+        /*LOCALSTORAGE */
+        // console.log(restante);
         document.querySelector('#restante').textContent = restante;
         
         const btnAgregar = formulario.querySelector('button');
@@ -124,6 +134,7 @@ class UI{
         }
     }
     comprobarPresupuesto(presupuestoObj){
+        
         const {presupuesto, restante} = presupuestoObj;
         const restanteDiv = document.querySelector('.restante');
         restanteDiv.classList.add('alert-sucess');
@@ -165,6 +176,8 @@ let presupuesto;
 // instanciar UI
 const ui = new UI();
 
+
+
 // Funciones
 function preguntarPresupuesto(e) {
     e.preventDefault();
@@ -172,10 +185,10 @@ function preguntarPresupuesto(e) {
 
     const presupuestoUsuario = Number(document.querySelector('#budgetInput').value);
 
-    console.log(presupuestoUsuario);
+    // console.log(presupuestoUsuario);
 
-    console.log(Number(presupuestoUsuario)); //me tranforma a numero
-    console.log(isNaN(presupuestoUsuario)); //is not a number, es decir verifica si un valor no es un numero
+    // console.log(Number(presupuestoUsuario)); //me tranforma a numero
+    // console.log(isNaN(presupuestoUsuario)); //is not a number, es decir verifica si un valor no es un numero
 
     if (presupuestoUsuario === '' || presupuestoUsuario === null || isNaN(presupuestoUsuario) || presupuestoUsuario <= 0) {
         // window.location.reload(); //me refresca la pagina
@@ -189,6 +202,8 @@ function preguntarPresupuesto(e) {
 
     ui.insertarPresupuesto(presupuesto);
     modal.style.display = "none";
+
+    /* LOCALSTORAGE */
 }
 
 function agregarGasto(e) {
@@ -241,26 +256,14 @@ function agregarGasto(e) {
 
 }
 
-function borrarGasto(e) {
-    e.preventDefault();
-    if (e.target.classList.contains('borrar-gasto')) {
-        const Id = Number(e.target.parentElement.dataset.id);
-        // console.log(Id);
-        
-        // filtrando el gasto con el mismo id
-        presupuesto.gastos = presupuesto.gastos.filter( gasto => gasto.id !== Id);
-
-        // console.log(presupuesto.gastos);
-        ui.mostrarListado(presupuesto.gastos);
-
-        
-        presupuesto.calcularRestante();
-        ui.actualizarRestante(presupuesto.restante);
-        ui.comprobarPresupuesto(presupuesto);
-
-        
-    }
-
-    
+function borrarGasto(id) {
+    // elimina del objeto
+    presupuesto.borrarGasto(id);
+    // elimina del html
+    ui.mostrarListado(presupuesto.gastos);
+    // actualiza el restante del presupuesto en el html
+    ui.actualizarRestante(presupuesto.restante);
+    // cambiar color de restante
+    ui.comprobarPresupuesto(presupuesto);
 
 }
